@@ -1,0 +1,9 @@
+---
+# handlers file for cyber-test-range-target
+- name: Cyber Test Range Target | Reload CVE's Facts
+  setup:
+    filter: ansible_local
+
+- name: Cyber Test Range Target | Reload CPE Facts
+  setup:
+    filter: ansible_local

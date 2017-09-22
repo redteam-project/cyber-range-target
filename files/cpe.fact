@@ -1,0 +1,3 @@
+#!/bin/bash
+
+echo \"$(cat /etc/system-release-cpe | cut -d: -f1,2,3,4,5 | cut -d. -f1 | sed -e 's/\//\\\//')\"

@@ -1,0 +1,12 @@
+---
+- hosts: localhost
+  connection: local
+  roles:
+    - fedoraredteam.cyber-test-range-target
+  tasks:
+  - debug:
+      msg: "Hello"
+  - debug:
+      msg: "CVE is {{ item['name'] }}"
+      with_rhcsapi:
+      - CVE-2014-6271

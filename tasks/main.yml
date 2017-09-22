@@ -1,0 +1,52 @@
+---
+# tasks file for cyber-test-range-target
+- name: Cyber Test Range Target | Ensure Custom Facts Directory Exists
+  file:
+    path=/etc/ansible/facts.d
+    recurse=yes
+    state=directory
+
+- name: Cyber Test Range Target | Install Custom Fact Module for CVE's
+  copy:
+    src=cves.fact
+    dest=/etc/ansible/facts.d/cves.fact
+    mode=0750
+  notify: Cyber Test Range Target | Reload CVE's Facts
+
+- name: Cyber Test Range Target | Install Custom Fact Module for CPE
+  copy:
+    src=cpe.fact
+    dest=/etc/ansible/facts.d/cpe.fact
+    mode=0750
+  notify: Cyber Test Range Target | Reload CPE Facts
+
+- name: Cyber Test Range Target | Obtain CVE Information
+  set_fact:
+    cve: "{{ lookup('rhsecapi', item, validate_certs) }}"
+  with_items: "{{ cves_to_test }}"
+  register: cve_info
+
+- name: Cyber Test Range Target | Flush Handlers
+  meta: flush_handlers
+
+- name: Cyber Test Range Target | Build Package Information
+  set_fact:
+    package: "{{ item.1.package }}"
+    cpe: "{{ item.1.cpe }}"
+    cve: "{{ item.0.item }}"
+    package_name: "{{ item.1.package | regex_search('([^-]+)') }}"
+  with_subelements:
+  - "{{ cve_info.results }}"
+  - ansible_facts.cve.affected_release
+  register: affected_releases
+  loop_control:
+    label: "{{ item.0.item }} - {{ item.1.cpe }}"
+
+- name: Cyber Test Range Target | Install Appropriate Packages
+  yum:
+    allow_downgrade: yes
+    name: "{{ item.ansible_facts.package }}"
+  with_items: "{{ affected_releases.results }}"
+  when: item.ansible_facts.cpe.startswith(ansible_local.cpe) and item.ansible_facts.cve not in ansible_local.cves
+  loop_control:
+    label: "{{ item.ansible_facts.cve }} - {{ item.ansible_facts.cpe }} - {{ item.ansible_facts.package }}"

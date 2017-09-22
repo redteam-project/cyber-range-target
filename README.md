@@ -1,7 +1,9 @@
 cyber-test-range-target
 =========
 
-This role endeavors to simplify building a host  for a cyber-test range.
+This role endeavors to simplify building a host for a cyber-test range.  This role is for assessment purposes only.  
+
+**Note:** This has the potential to render a host vulnerable.  Use with care.
 
 Requirements
 ------------

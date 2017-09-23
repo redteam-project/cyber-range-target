@@ -20,14 +20,21 @@
     mode=0750
   notify: Cyber Test Range Target | Reload CPE Facts
 
+- name: Cyber Test Range Target | Install Custom Fact Module for Available Packages
+  copy:
+    src=available_packages.fact
+    dest=/etc/ansible/facts.d/available_packages.fact
+    mode=0750
+  notify: Cyber Test Range Target | Reload Available Packages Facts
+
+- name: Cyber Test Range Target | Flush Handlers
+  meta: flush_handlers
+
 - name: Cyber Test Range Target | Obtain CVE Information
   set_fact:
     cve: "{{ lookup('rhsecapi', item, validate_certs) }}"
   with_items: "{{ cves_to_test }}"
   register: cve_info
-
-- name: Cyber Test Range Target | Flush Handlers
-  meta: flush_handlers
 
 - name: Cyber Test Range Target | Build Package Information
   set_fact:
@@ -45,7 +52,7 @@
 - name: Cyber Test Range Target | Install Appropriate Packages
   yum:
     allow_downgrade: yes
-    name: "{{ item.ansible_facts.package }}"
+    name: "{{ ansible_local.available_packages[item.ansible_facts.package]['downgrade'] }}"
   with_items: "{{ affected_releases.results }}"
   when: item.ansible_facts.cpe.startswith(ansible_local.cpe) and item.ansible_facts.cve not in ansible_local.cves
   loop_control:

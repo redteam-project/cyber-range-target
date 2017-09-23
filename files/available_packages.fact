@@ -1,0 +1,50 @@
+#!/usr/bin/python
+
+import subprocess
+import sys
+import json
+import os
+import platform
+
+lines = []
+package_dict = {}
+package_list = []
+machine_arch = platform.machine()
+
+try:
+	command = ["yum", "list", "available", "--showduplicates"]
+        p = subprocess.Popen(command,
+                             stdout=subprocess.PIPE,
+                             stderr=subprocess.PIPE)
+        out, err = p.communicate()
+        lines = out.split('\n')
+        error_lines = err.split('\n')
+except OSError:
+        sys.exit(1)
+
+for line in lines:
+	if not line.startswith('Loaded plugins') and not line.startswith('Available'):
+		values = filter(lambda a: a != '', line.split(' '))
+		if len(values) > 1:
+			full_package = values[0] + '-' + values[1]
+			if machine_arch in full_package or 'noarch' in full_package:
+				full_package = full_package.replace('.' + machine_arch, '')
+				full_package = full_package.replace('.noarch', '')
+				package_list.append(full_package)
+
+for index, package in enumerate(package_list):
+	package_start_name = package[:package.index('-') + 1]
+	if package not in package_dict.keys():
+		package_dict[package] = dict(downgrade=None, upgrade=None)
+
+	if index != 0:
+		previous_package = package_list[package_list.index(package) - 1]
+		if previous_package.startswith(package_start_name):
+			package_dict[package]['downgrade'] = previous_package
+
+	if index != len(package_list) - 1:
+		next_package = package_list[package_list.index(package) + 1]
+		if next_package.startswith(package_start_name):
+			package_dict[package]['upgrade'] = next_package
+
+print json.dumps(package_dict)

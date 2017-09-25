@@ -11,21 +11,21 @@
     src=cves.fact
     dest=/etc/ansible/facts.d/cves.fact
     mode=0750
-  notify: Cyber Test Range Target | Reload CVE's Facts
+  notify: Cyber Test Range Target | Reload Local Facts
 
 - name: Cyber Test Range Target | Install Custom Fact Module for CPE
   copy:
     src=cpe.fact
     dest=/etc/ansible/facts.d/cpe.fact
     mode=0750
-  notify: Cyber Test Range Target | Reload CPE Facts
+  notify: Cyber Test Range Target | Reload Local Facts
 
 - name: Cyber Test Range Target | Install Custom Fact Module for Available Packages
   copy:
     src=available_packages.fact
     dest=/etc/ansible/facts.d/available_packages.fact
     mode=0750
-  notify: Cyber Test Range Target | Reload Available Packages Facts
+  notify: Cyber Test Range Target | Reload Local Facts
 
 - name: Cyber Test Range Target | Flush Handlers
   meta: flush_handlers

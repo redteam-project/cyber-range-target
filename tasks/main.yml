@@ -70,10 +70,8 @@
   when: item.ansible_facts.cpe.startswith(ansible_local.cpe) and item.ansible_facts.cve not in ansible_local.cves and 'kernel' in item.ansible_facts.package_name
   loop_control:
     label: "{{ item.ansible_facts.cve }} - {{ item.ansible_facts.cpe }}"
+  register: kernel
 
 - debug:
-    msg: "A different kernel was installed.  A reboot is recommended."
-  with_items: "{{ affected_releases.results }}"
-  when: item.ansible_facts.cpe.startswith(ansible_local.cpe) and item.ansible_facts.cve not in ansible_local.cves and 'kernel' in item.ansible_facts.package_name
-  loop_control:
-    label: "{{ item.ansible_facts.cve }} - {{ item.ansible_facts.cpe }}"
+    msg: "A different kernel was installed so a reboot is recommended."
+  when: kernel.changed

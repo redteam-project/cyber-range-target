@@ -1,6 +1,5 @@
 #!/bin/bash
 
-
 declare -a cves
 cves=$(yum updateinfo list cves | cut -d" " -f2 | grep ^CVE)
 

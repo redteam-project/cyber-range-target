@@ -1,5 +1,10 @@
 ---
 # tasks file for cyber-test-range-target
+- name: Cyber Test Range Target | Install Yum Security Plugin
+  yum:
+    name: yum-plugin-security
+  when: ansible_distribution_major_version == 6
+
 - name: Cyber Test Range Target | Ensure Custom Facts Directory Exists
   file:
     path=/etc/ansible/facts.d
@@ -49,11 +54,26 @@
   loop_control:
     label: "{{ item.0.item }} - {{ item.1.cpe }}"
 
-- name: Cyber Test Range Target | Install Appropriate Packages
+- name: Cyber Test Range Target | Install Appropriate Packages Not Kernel
   yum:
     allow_downgrade: yes
     name: "{{ ansible_local.available_packages[item.ansible_facts.package]['downgrade'] }}"
   with_items: "{{ affected_releases.results }}"
-  when: item.ansible_facts.cpe.startswith(ansible_local.cpe) and item.ansible_facts.cve not in ansible_local.cves
+  when: item.ansible_facts.cpe.startswith(ansible_local.cpe) and item.ansible_facts.cve not in ansible_local.cves and 'kernel' not in item.ansible_facts.package_name
   loop_control:
-    label: "{{ item.ansible_facts.cve }} - {{ item.ansible_facts.cpe }} - {{ item.ansible_facts.package }}"
+    label: "{{ item.ansible_facts.cve }} - {{ item.ansible_facts.cpe }}"
+
+- name: Cyber Test Range Target | Install Different Kernel Version if Necessary
+  yum:
+    name: "{{ ansible_local.available_packages[item.ansible_facts.package]['downgrade'] }}"
+  with_items: "{{ affected_releases.results }}"
+  when: item.ansible_facts.cpe.startswith(ansible_local.cpe) and item.ansible_facts.cve not in ansible_local.cves and 'kernel' in item.ansible_facts.package_name
+  loop_control:
+    label: "{{ item.ansible_facts.cve }} - {{ item.ansible_facts.cpe }}"
+
+- debug:
+    msg: "A different kernel was installed.  A reboot is recommended."
+  with_items: "{{ affected_releases.results }}"
+  when: item.ansible_facts.cpe.startswith(ansible_local.cpe) and item.ansible_facts.cve not in ansible_local.cves and 'kernel' in item.ansible_facts.package_name
+  loop_control:
+    label: "{{ item.ansible_facts.cve }} - {{ item.ansible_facts.cpe }}"

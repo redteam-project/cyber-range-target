@@ -54,6 +54,11 @@
   loop_control:
     label: "{{ item.0.item }} - {{ item.1.cpe }}"
 
+- name: Cyber Test Range Target | Set SELinux State
+  selinux:
+    policy: targeted
+    state: "{{ selinux_state }}"
+
 - name: Cyber Test Range Target | Install Appropriate Packages Not Kernel
   yum:
     allow_downgrade: yes

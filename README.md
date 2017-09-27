@@ -18,6 +18,7 @@ Role Variables
 # defaults file for cyber-test-range-target
 # Which CVE's should be tested on a host
 cves_to_test: []
+selinux_state: enforcing
 ```
 
 Dependencies

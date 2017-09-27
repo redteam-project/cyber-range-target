@@ -1,0 +1,9 @@
+#!/bin/bash
+
+CURRENT_KERNEL_VERSION=$(uname -a -r | cut -d' ' -f3 | sed -e 's/.{{ ansible_architecture }}//')
+
+for VERSION in $(yum list installed | grep kernel.{{ ansible_architecture }} | grep -v $CURRENT_KERNEL_VERSION | awk '{print $2}' ); do
+        yum remove -y kernel-$VERSION
+done
+
+systemctl disable remove-kernels.service

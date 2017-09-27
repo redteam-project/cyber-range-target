@@ -1,0 +1,10 @@
+[Unit]
+After=time-sync.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/bin/remove-kernels.sh
+
+[Install]
+WantedBy=multi-user.target
+WantedBy=graphical.target

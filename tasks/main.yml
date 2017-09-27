@@ -7,29 +7,29 @@
 
 - name: Cyber Test Range Target | Ensure Custom Facts Directory Exists
   file:
-    path=/etc/ansible/facts.d
-    recurse=yes
-    state=directory
+    path: /etc/ansible/facts.d
+    recurse: yes
+    state: directory
 
 - name: Cyber Test Range Target | Install Custom Fact Module for CVE's
   copy:
-    src=cves.fact
-    dest=/etc/ansible/facts.d/cves.fact
-    mode=0750
+    src: cves.fact
+    dest: /etc/ansible/facts.d/cves.fact
+    mode: 0750
   notify: Cyber Test Range Target | Reload Local Facts
 
 - name: Cyber Test Range Target | Install Custom Fact Module for CPE
   copy:
-    src=cpe.fact
-    dest=/etc/ansible/facts.d/cpe.fact
-    mode=0750
+    src: cpe.fact
+    dest: /etc/ansible/facts.d/cpe.fact
+    mode: 0750
   notify: Cyber Test Range Target | Reload Local Facts
 
 - name: Cyber Test Range Target | Install Custom Fact Module for Available Packages
   copy:
-    src=available_packages.fact
-    dest=/etc/ansible/facts.d/available_packages.fact
-    mode=0750
+    src: available_packages.fact
+    dest: /etc/ansible/facts.d/available_packages.fact
+    mode: 0750
   notify: Cyber Test Range Target | Reload Local Facts
 
 - name: Cyber Test Range Target | Flush Handlers
@@ -72,6 +72,35 @@
     label: "{{ item.ansible_facts.cve }} - {{ item.ansible_facts.cpe }}"
   register: kernel
 
-- debug:
-    msg: "A different kernel was installed so a reboot is recommended."
-  when: kernel.changed
+- name: Cyber Test Range Target | Set Fact for Changed Kernel
+  set_fact:
+    kernel_changed: "{{ kernel.changed }}"
+
+- name: Cyber Test Range Target | Add Script to Remove Unecessary Kernels
+  template:
+    src: remove-kernels.sh.j2
+    dest: /usr/local/bin/remove-kernels.sh
+    mode: 0700
+    owner: root
+    group: root
+  when: kernel_changed
+
+- name: Cyber Test Range Target | Add One Time Service to Remove Kernels - EL 7
+  copy:
+    src: remove-kernels.service
+    dest: /etc/systemd/system/remove-kernels.service
+  when: kernel_changed and ansible_distribution_major_version == "7"
+
+- name: Cyber Test Range Target | Enable One Time Service to Remove Kernels - EL 7
+  systemd:
+    name: remove-kernels.service
+    daemon_reload: yes
+    enabled: yes
+  when: kernel_changed and ansible_distribution_major_version == "7"
+
+- name: Cyber Test Range Target | Restart Host to Effect Kernel Change
+  command: /sbin/shutdown -r +1
+  async: 0
+  poll: 0
+  ignore_errors: true
+  when: kernel_changed

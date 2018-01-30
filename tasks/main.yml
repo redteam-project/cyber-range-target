@@ -59,6 +59,12 @@
     policy: targeted
     state: "{{ selinux_state }}"
 
+- name: Cyber Test Range Target | Install Git and Python Virtualenv
+  yum:
+    name:
+    - python-virtualenv
+    - git
+
 - name: Cyber Test Range Target | Install Appropriate Packages Not Kernel
   yum:
     allow_downgrade: yes

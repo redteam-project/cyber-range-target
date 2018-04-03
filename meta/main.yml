@@ -7,7 +7,7 @@ galaxy_info:
   min_ansible_version: 2.4
 
   platforms:
-  - name: Red Hat Enterprise Linux
+  - name: EL
     versions:
     - 6
     - 7

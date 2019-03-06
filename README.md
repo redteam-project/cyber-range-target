@@ -1,7 +1,7 @@
 cyber-range-target
 =========
 
-This role endeavors to simplify building a host for a cyber range.  This role is for assessment purposes only.  
+This role endeavors to simplify building a host for a cyber range.  This role is for assessment purposes only.
 
 **Note:** This has the potential to render a host vulnerable.  Use with care.
 
@@ -36,7 +36,7 @@ The following example playbook would ensure that Bash prone to shell shock is av
   remote_user: admin
   become: true
   roles:
-    - fedoraredteam.cyber-range-target
+    - redteam-project.cyber-range-target
   vars:
     cves_to_test:
     - CVE-2014-6271

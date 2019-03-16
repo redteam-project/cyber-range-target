@@ -5,10 +5,10 @@ from __future__ import (absolute_import, division, print_function)
 __metaclass__ = type
 
 from ansible.errors import AnsibleError
-from ansible.module_utils.six.moves.urllib.error import HTTPError, URLError
 from ansible.plugins.lookup import LookupBase
 from ansible.module_utils.urls import open_url, ConnectionError, SSLValidationError
 from ansible.module_utils.basic import AnsibleModule
+from six.moves.urllib.error import HTTPError, URLError
 
 import json
 import re
@@ -19,6 +19,7 @@ try:
 except ImportError:
     from ansible.utils.display import Display
     display = Display()
+
 
 class LookupModule(LookupBase):
 
@@ -36,10 +37,17 @@ class LookupModule(LookupBase):
 
     def _get_information(self, url, validate_certs, use_proxy):
         display.vvv("rhsecapi lookup connecting to %s" % url)
+        headers = {'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.11 (KHTML, like Gecko) Chrome/23.0.1271.64 Safari/537.11',
+                         'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+                         'Accept-Charset': 'ISO-8859-1,utf-8;q=0.7,*;q=0.3',
+                         'Accept-Encoding': 'none',
+                         'Accept-Language': 'en-US,en;q=0.8',
+                         'Connection': 'keep-alive'}
         try:
             response = open_url(url,
                                 validate_certs=validate_certs,
-                                use_proxy=use_proxy)
+                                use_proxy=use_proxy,
+                                headers=headers)
             return response.read()
         except HTTPError as e:
             raise AnsibleError("Received HTTP error for %s : %s" %

@@ -11,7 +11,7 @@
     recurse: yes
     state: directory
 
-- name: Cyber Test Range Target | Install Custom Fact Module for CVE's
+- name: Cyber Test Range Target | Install Custom Fact Module for CVEs
   copy:
     src: cves.fact
     dest: /etc/ansible/facts.d/cves.fact

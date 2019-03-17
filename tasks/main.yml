@@ -71,7 +71,7 @@
     allow_downgrade: yes
     name: "{{ ansible_local.available_packages[item.ansible_facts.package]['downgrade'] }}"
   with_items: "{{ affected_releases.results }}"
-  when: item.ansbile_facts is defined and (item.ansible_facts.cpe.startswith(ansible_local.cpe) and item.ansible_facts.cve not in ansible_local.cves and 'kernel' not in item.ansible_facts.package_name)
+  when: (item.ansible_facts is defined and item.ansible_facts) and (item.ansible_facts.cpe.startswith(ansible_local.cpe) and item.ansible_facts.cve not in ansible_local.cves and 'kernel' not in item.ansible_facts.package_name)
   loop_control:
     label: "{{ item._ansible_item_label }}"
   ignore_errors: yes
@@ -80,7 +80,7 @@
   yum:
     name: "{{ ansible_local.available_packages[item.ansible_facts.package]['downgrade'] }}"
   with_items: "{{ affected_releases.results }}"
-  when: item.ansbile_facts is defined and item.ansible_facts.cpe.startswith(ansible_local.cpe) and item.ansible_facts.cve not in ansible_local.cves and 'kernel' in item.ansible_facts.package_name
+  when: (item.ansible_facts is defined and item.ansible_facts) and (item.ansible_facts.cpe.startswith(ansible_local.cpe) and item.ansible_facts.cve not in ansible_local.cves and 'kernel' in item.ansible_facts.package_name)
   loop_control:
     label: "{{ item._ansible_item_label }}"
   register: kernel
